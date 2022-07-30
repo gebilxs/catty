@@ -1,11 +1,8 @@
 package router
 
 import (
-	"catty/controller"
 	"catty/docs"
-	"catty/middleware"
 	"github.com/e421083458/golang_common/lib"
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -74,34 +71,5 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	})
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	//demo
-	v1 := router.Group("/demo")
-	v1.Use(middleware.RecoveryMiddleware(), middleware.RequestLog(), middleware.IPAuthMiddleware(), middleware.TranslationMiddleware())
-	{
-		controller.DemoRegister(v1)
-	}
-
-	//非登陆接口
-	store := sessions.NewCookieStore([]byte("secret"))
-	apiNormalGroup := router.Group("/api")
-	apiNormalGroup.Use(sessions.Sessions("mysession", store),
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
-		middleware.TranslationMiddleware())
-	{
-		controller.ApiRegister(apiNormalGroup)
-	}
-
-	//登陆接口
-	apiAuthGroup := router.Group("/api")
-	apiAuthGroup.Use(
-		sessions.Sessions("mysession", store),
-		middleware.RecoveryMiddleware(),
-		middleware.RequestLog(),
-		middleware.SessionAuthMiddleware(),
-		middleware.TranslationMiddleware())
-	{
-		controller.ApiLoginRegister(apiAuthGroup)
-	}
 	return router
 }
